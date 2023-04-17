@@ -1,4 +1,3 @@
-
 //import java.util.ArrayList;
 import java.util.Arrays;
 //import java.util.List;
@@ -11,6 +10,10 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 	public class Pronosticodeportivo {
+		
+	static int ids;
+	static int puntos;	
+	
 	static boolean permi;
 	static String participantes;
 	static String zona;
@@ -79,15 +82,13 @@ import java.time.format.DateTimeFormatter;
 	Scanner teclado = new Scanner(System.in);
 	while(true) {
 		System.out.println("PRONOSTICO COPA DEL MUNDO 2022 - FECHA DEL PRONOSTICO: "+LocalDate.now()+" "+LocalTime.now());
-		System.out.println("POR CADA ACIERTO UN PUNTO");
 		System.out.println("SELECCIONE UNA ACTIVIDAD: ");
-		System.out.println("a. Realizar un pronostico");
-		System.out.println("b. Ver los equipos participantes");
-		System.out.println("c. Ingresar los resultados finales de los partidos");
-		System.out.println("d. Ver los ganadores de los pronosticos");
+		System.out.println("a. Realizar un pronostico - b. Ver los equipos participantes");
+		System.out.println("c. Ingresar los resultados finales de los partidos - d. Ver los ganadores de los pronosticos");
 		System.out.println("e. Ver resultado de los partidos: Perdedor - Ganador - Empate");
 		System.out.println("f. Ver los pronosticos realizados y los puntos");
-		System.out.println("g. Salir");
+		System.out.println("g. Configurar puntos - h. Consultar Base de datos de pronostico");
+		System.out.println("i. Salir");
 		opcion = teclado.nextLine().toLowerCase();
 		switch(opcion) {
 		case "a": 
@@ -769,12 +770,44 @@ import java.time.format.DateTimeFormatter;
 				parti.mostrar();
 				break;
 		case "g":
+				Configurar confi = new Configurar();
+				confi.configuracion();
+				System.out.print("Ingrese el Id:");
+				
+				try {
+					ids = teclado.nextInt();
+				}
+				catch(Exception ex) {
+					System.err.println(ex);
+					System.out.println("VALOR NO NUMERICO, VUELVA A INTENTARLO");
+					break;
+				}	
+				
+				System.out.print("Puntos:");
+				try {
+					puntos = teclado.nextInt();
+				}
+				catch(Exception ex) {
+					System.err.println(ex);
+					System.out.println("VALOR NO NUMERICO, VUELVA A INTENTARLO");
+					break;
+				}
+				Configurar confi2= new Configurar(ids, puntos);
+				confi2.actualizar();
+				break;
+		case "h":
+				Consultarbasededatos consulta = new Consultarbasededatos();
+				consulta.pronosticosql();
+				System.out.println();
+				consulta.ganadoressql();
+				break;
+		case "i":
 				break;
 		default: 
 				System.out.println("OPCION NO VALIDA...");
 		}
 		System.out.println(" ");
-		if("g".equals(opcion)) {
+		if("i".equals(opcion)) {
 			teclado.close();
 			break;
 		}

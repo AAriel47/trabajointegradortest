@@ -1,7 +1,12 @@
 
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.nio.file.Paths;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -9,6 +14,12 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Participantes {
+	static int[] punval = new int[3];
+	static String pungan;
+	static int pungan1;
+	static int adic=0;
+
+	
 	static boolean entrar=false;
 	static String reducir;
 	static String contenido1;
@@ -70,6 +81,36 @@ public class Participantes {
 						}
 	
 					}
+				//******************************************
+					
+					try{
+						Class.forName("com.mysql.cj.jdbc.Driver");
+						Connection con=DriverManager.getConnection("jdbc:mysql://localhost:3306/pronosticodeportivo","root","");
+						Statement stmt=con.createStatement();
+						stmt.executeUpdate("DELETE FROM pronostico");
+						String valor = varios[0];
+						for (int i =1; i<varios.length;i++) {
+							valor = valor + varios[i];
+							String mens="INSERT INTO pronostico (pronos) values (\"" + valor+"\")";
+							stmt.executeUpdate(mens);
+							i++;
+							valor="";
+							if(i==varios.length) {
+								break;
+							}
+							valor = valor + varios[i];
+						}
+						//ResultSet rs=stmt.executeQuery("select * from pronostico");
+						//while(rs.next()) {
+						//System.out.println("ID:"+rs.getString(1));
+						//USO DE LA DB
+						//}
+						con.close();
+					}
+					catch(Exception e){ System.out.println(e);}
+					
+					
+					
 				//**************************************
 				
 					if ((!Files.exists(reducida))|| (!Files.exists(pronosreducido))){
@@ -151,14 +192,75 @@ public class Participantes {
 					valor = valores.split(",");
 					
 					List<String> datosgana =new ArrayList<String>();
+					List<String> datosgana2 =new ArrayList<String>();
+
+					
 					for (int i=0;i<valor.length;i++) {
 						datosgana.add(valor[i].toString());
 					}					
+					//-------------------------------
+					try{
+						Class.forName("com.mysql.cj.jdbc.Driver");
+						Connection con=DriverManager.getConnection("jdbc:mysql://localhost:3306/pronosticodeportivo","root","");
+						Statement stmt=con.createStatement();
+						ResultSet st = stmt.executeQuery("select * from configuracion");
+						int s = 1;
+						while(st.next()) {
+							if(s==1) {
+								punval[0] = st.getInt(3);
+							}else if(s==4) {
+								punval[1] = st.getInt(3);
+							}else if(s==5) {
+								punval[2] = st.getInt(3);
+							}
+							s++;
+						}
+						//
+						//
+						con.close();
+					}
+					catch(Exception ep){ System.out.println(ep);}
 					
+					//----------------------------------
 					System.out.println("PARTICIPANTE - PUNTOS: ");
 					for(int e = 0;e<datosgana.size();e++) {
-						System.out.println(datosgana.get(e));
+						//System.out.println(datosgana.get(e));
+						
+						pungan = datosgana.get(e).substring(datosgana.get(e).length()-1, datosgana.get(e).length());
+						pungan1 = Integer.parseInt(pungan);
+						int respun = punval[0];
+						if (pungan1==2) {
+							adic = punval[1];
+						}else if(pungan1==6) {
+							adic = punval[2];
+						}
+						System.out.println(datosgana.get(e)+" Puntos obtenidos "+((pungan1*respun)+adic));
+						String grarel = datosgana.get(e)+" Puntos obtenidos "+((pungan1*respun)+adic);
+						adic=0;
+						datosgana2.add(grarel);
+
 					}
+					//*********************************************
+					
+					try{
+						Class.forName("com.mysql.cj.jdbc.Driver");
+						Connection con=DriverManager.getConnection("jdbc:mysql://localhost:3306/pronosticodeportivo","root","");
+						Statement stmt=con.createStatement();
+						stmt.executeUpdate("DELETE FROM ganadores");
+						String valor;// = datosgana.get(0);
+						for (int i =0; i<datosgana2.size();i++) {
+							valor = datosgana2.get(i);
+							String mens="INSERT INTO ganadores (nombres) values (\"" + valor+"\")";
+							stmt.executeUpdate(mens);
+							if(i==varios.length) {
+								break;
+							}
+						}
+						con.close();
+					}
+					catch(Exception e){ System.out.println(e);}					
+					
+					//*********************************************
 				}
 			}
 		}
